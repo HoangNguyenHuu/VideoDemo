@@ -1,8 +1,9 @@
 import cv2
 import numpy as np
 import os
-class VideoDemo:
 
+
+class VideoDemo:
     def __init__(self, link):
         self.link = link
 
@@ -23,7 +24,7 @@ class VideoDemo:
                 break
 
             # Tinh histogram
-            hist_new = cv2.calcHist([frame], [0, 1, 2], None, [256, 256, 256],
+            hist_new = cv2.calcHist([frame], [0, 1, 2], None, [32, 32, 32],
                                     [0, 256, 0, 256, 0, 256])
 
             # Neu la frame dau tien thi chua can so sanh
@@ -44,11 +45,11 @@ class VideoDemo:
             i = i + 1
             hist_old = hist_new
 
-        print i
+        # print i
         cap.release()
         return list_distance
 
-    def calcAdaptiveThreshold(self,list_distance,  w, c):
+    def calcAdaptiveThreshold(self, list_distance, w, c):
         # lay cua so kich thuoc la 2 * w + 1
         # nguong cao hon gia tri trung binh la c
         list_threshold = {}
@@ -61,7 +62,6 @@ class VideoDemo:
             else:
                 list_threshold[key] = list_distance[key] + c
         return list_threshold
-
 
     def calcSecondDerivative(self, list_distance):
         # phan nay tinh dao ham bac 2 cho histogram
@@ -80,19 +80,34 @@ class VideoDemo:
         arr_distance = np.array(list_distance.items(), dtype='float')
         temp = arr_distance[:, 1]
         total = np.nansum(temp)
-        higher = 2 * total / len(temp)
+        higher = 3 * total / len(temp)
         return higher
 
     def calcBoundary(self, list_distance, list_threshold):
         list_bounary = {}
-        j =0
+        j = 0
         for i in range(0, len(list_distance)):
-            if(list_distance[i] > list_threshold[i]):
+            if (list_distance[i] > list_threshold[i]):
                 list_bounary[j] = i
-                j = j+1
+                j = j + 1
         return list_bounary
 
-    def getBoundary(self, list_boundary):
+    def getBeginEnd(self, list_boundary, length):
+        begin = {}
+        end = {}
+        begin[0] = 0
+        begin_index = 1
+        end_index = 0
+        for i in range(0, len(list_boundary)):
+            end[end_index] = list_boundary[i]
+            begin[begin_index] = list_boundary[i] + 1
+            begin_index = begin_index + 1
+            end_index = end_index + 1
+
+        end[end_index] = length - 1
+        return {"begin": begin, "end": end}
+
+    def getShotFrame(self, list_boundary):
         start = self.link.rfind('/')
         end = self.link.rfind('.')
         name = self.link[start + 1: end]
@@ -104,16 +119,20 @@ class VideoDemo:
                 file_path = os.path.join(dirname, the_file)
                 try:
                     if os.path.isfile(file_path):
-                            os.unlink(file_path)
+                        os.unlink(file_path)
                 except Exception as e:
                     print (e)
 
         cap = cv2.VideoCapture(self.link)
         length = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
-        print "Length: " + str(length)
+        # print "Length: " + str(length)
+        listShot = self.getBeginEnd(list_boundary, length)
+
+        list_begin = listShot["begin"]
+        list_end = listShot["end"]
         i = 0
-        j = 0
-        flag = False
+        begin_index = 0
+        end_index = 0
         # tinh histogram cho frame do va tinh khoang cach voi frame phia truoc
         while (cap.isOpened()):
             # Doc cac frame trong video
@@ -123,37 +142,21 @@ class VideoDemo:
             if (ret != True):
                 break
 
-            # Lay cac frame dau va cuoi cac shot
-            if i == 0:
-                filename = 'image_begin' + str(j) + '.png'
-                cv2.imwrite(os.path.join(dirname, filename), frame)
+            if begin_index < len(list_begin):
+                # Lay frame dau shot
+                if i == list_begin[begin_index]:
+                    filename = 'image_begin' + str(begin_index) + '.png'
+                    #                     print "Start shot " + str(begin_index) + " at frame: " + str(i)
+                    cv2.imwrite(os.path.join(dirname, filename), frame)
+                    begin_index = begin_index + 1
+            if end_index < len(list_end):
+                # Lay frame cuoi shot
+                if i == list_end[end_index]:
+                    filename = 'image_end' + str(end_index) + '.png'
+                    #                     print "End shot " + str(end_index) + " at frame: " + str(i)
+                    cv2.imwrite(os.path.join(dirname, filename), frame)
+                    end_index = end_index + 1
 
-            if (j >= len(list_boundary)):
-                if (flag == True):
-                    filename = 'image_begin' + str(j) + '.png'
-                    flag = False
-                    cv2.imwrite(os.path.join(dirname, filename), frame)
-                if i == length - 1:
-                    filename = 'image_end' + str(j) + '.png'
-                    cv2.imwrite(os.path.join(dirname, filename), frame)
-                    break
-                else:
-                    i = i + 1
-                    continue
-            if j > 0:
-                if i == list_boundary[j - 1] + 1:
-                    filename = 'image_begin' + str(j) + '.png'
-                    cv2.imwrite(os.path.join(dirname, filename), frame)
-
-            if i == list_boundary[j]:
-                filename = 'image_end' + str(j) + '.png'
-                cv2.imwrite(os.path.join(dirname, filename), frame)
-                j = j + 1
-                if (j >= len(list_boundary)):
-                    flag = True
             i = i + 1
+        print i
         cap.release()
-
-
-
-

@@ -5,8 +5,6 @@ from PyQt5.QtGui import *
 from PyQt5.QtCore import *
 from MyVideo import VideoDemo
 import numpy as np
-import matplotlib.pyplot as plt
-import cv2
 
 class QCustomQWidget (QWidget):
     def __init__ (self, parent = None):
@@ -84,11 +82,11 @@ class exampleQMainWindow (QMainWindow):
         array_distance = np.array(list_distance.items(), dtype='float')
         higher = video.calcHigherDegree(list_distance)
         list_threshold = video.calcAdaptiveThreshold(list_distance, 2, higher)
-        print higher
+        # print higher
         arr_threshold = np.array(list_threshold.items(), dtype='float')  # nguong adaptive
 
         list_boundary = video.calcBoundary(list_distance, list_threshold)
-        video.getBoundary(list_boundary)
+        video.getShotFrame(list_boundary)
 
         # plt.plot(arr_threshold[0:200, 0], arr_threshold[0:200, 1], 'red', array_distance[0:200, 0],
         #          array_distance[0:200, 1], 'blue')
@@ -119,14 +117,14 @@ class exampleQMainWindow (QMainWindow):
         file2.sort(key=len)
 
         for key in range(0, len(file1)):
-            print key
+            # print key
             text = "Shot " + str(key)
             imageLeft = file1[key]
             imgeRight = file2[key]
-            print imageLeft
-            print imgeRight
+            # print imageLeft
+            # print imgeRight
 
-            print "----"
+            # print "----"
 
             myQCustomQWidget = QCustomQWidget()
             myQCustomQWidget.setText(text)
