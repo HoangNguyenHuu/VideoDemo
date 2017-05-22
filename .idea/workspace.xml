@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="c9869436-5ab7-4821-bfe1-30d7125ce702" name="Default" comment="">
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/main/MyVideo.py" afterPath="$PROJECT_DIR$/main/MyVideo.py" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="TRACKING_ENABLED" value="true" />
@@ -18,7 +18,7 @@
         <entry file="file://$PROJECT_DIR$/main/MyVideo.py">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="133">
-              <caret line="189" column="43" lean-forward="false" selection-start-line="189" selection-start-column="43" selection-end-line="189" selection-end-column="43" />
+              <caret line="189" column="44" lean-forward="false" selection-start-line="189" selection-start-column="44" selection-end-line="189" selection-end-column="44" />
               <folding>
                 <element signature="e#0#10#0" expanded="true" />
               </folding>
@@ -777,7 +777,7 @@
     <entry file="file://$PROJECT_DIR$/main/MyVideo.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="133">
-          <caret line="189" column="43" lean-forward="false" selection-start-line="189" selection-start-column="43" selection-end-line="189" selection-end-column="43" />
+          <caret line="189" column="44" lean-forward="false" selection-start-line="189" selection-start-column="44" selection-end-line="189" selection-end-column="44" />
           <folding>
             <element signature="e#0#10#0" expanded="true" />
           </folding>
