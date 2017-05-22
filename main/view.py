@@ -76,25 +76,16 @@ class exampleQMainWindow (QMainWindow):
         self.labelFirstFrame.setText("Please Wait...")
         fname = QFileDialog.getOpenFileName(self, 'Open file', '/home')
         video = VideoDemo(fname[0])
-        validVideo = video.validVideo()
-        if validVideo == False:
-            return
-        list_distance = video.calcDifferent()
-
-        threshold = video.detectThreshold()
-        print "################threshold"
-        print threshold
-        list_boundary = video.detectShot(threshold)
-        print list_boundary
+        list_distance = video.calcDifferent();
 
         # Chuyen ve dang numpy.array de ve do thi tren matplotlib
         array_distance = np.array(list_distance.items(), dtype='float')
-        # higher = video.calcHigherDegree(list_distance)
-        # list_threshold = video.calcAdaptiveThreshold(list_distance, 2, higher)
-        #
-        # arr_threshold = np.array(list_threshold.items(), dtype='float')  # nguong adaptive
-        #
-        # list_boundary = video.calcBoundary(list_distance, list_threshold)
+        higher = video.calcHigherDegree(list_distance)
+        list_threshold = video.calcAdaptiveThreshold(list_distance, 2, higher)
+        # print higher
+        arr_threshold = np.array(list_threshold.items(), dtype='float')  # nguong adaptive
+
+        list_boundary = video.calcBoundary(list_distance, list_threshold)
         video.getShotFrame(list_boundary)
 
         # plt.plot(arr_threshold[0:200, 0], arr_threshold[0:200, 1], 'red', array_distance[0:200, 0],
@@ -112,7 +103,7 @@ class exampleQMainWindow (QMainWindow):
         start = self.link.rfind('/')
         end = self.link.rfind('.')
         name = self.link[start + 1: end]
-        dirname = os.path.dirname(os.path.dirname(os.path.abspath(__file__))) + name + '_boundary/'
+        dirname = '/home/hoangnh/boundary/' + name + '_boundary/'
         files = []
         for file in os.listdir(dirname):
             if file.endswith(".png"):
