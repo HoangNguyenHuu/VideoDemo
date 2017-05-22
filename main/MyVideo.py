@@ -1,11 +1,24 @@
 import cv2
 import numpy as np
 import os
+import operator
 
 
 class VideoDemo:
     def __init__(self, link):
         self.link = link
+
+    def validVideo(self):
+        cap = cv2.VideoCapture(self.link)
+        if not cap.isOpened():
+            print "Fatal error - could not open video."
+            return False
+        else:
+            print "Parsing video..."
+            width = cap.get(cv2.CAP_PROP_FRAME_WIDTH)
+            height = cap.get(cv2.CAP_PROP_FRAME_HEIGHT)
+            print "Video Resolution: %d x %d" % (width, height)
+            return True
 
     def calcDifferent(self):
         cap = cv2.VideoCapture(self.link)
@@ -111,7 +124,7 @@ class VideoDemo:
         start = self.link.rfind('/')
         end = self.link.rfind('.')
         name = self.link[start + 1: end]
-        dirname = '/home/hoangnh/boundary/' + name + '_boundary/'
+        dirname = os.path.dirname(os.path.dirname(os.path.abspath(__file__))) + name + '_boundary/'
         if not os.path.exists(dirname):
             os.makedirs(dirname)
         else:
@@ -158,5 +171,49 @@ class VideoDemo:
                     end_index = end_index + 1
 
             i = i + 1
-        print i
         cap.release()
+
+    def detectThreshold(self):
+        global list_distance
+        threshold = 0
+        list_distance = self.calcDifferent()
+        list_distance_sort = reversed(sorted(list_distance.items(), key=operator.itemgetter(1)))
+        max_distance = max(list_distance, key=list_distance.get)
+        min_distance = min(list_distance, key=list_distance.get)
+        print "###########max_distance"
+        print max_distance
+        print "###########min_distance"
+        print min_distance
+        print "##############"
+        print list_distance_sort
+        for item in list_distance_sort:
+            if self.isChangeShot(item[0], 50):
+                threshold = item[1]
+        return threshold
+
+    def detectShot(self, threshold):
+        list_bounary = {}
+        j = 0
+        for i in range(0, len(list_distance)):
+            if list_distance[i] >= threshold:
+                if i < len(list_distance) - 1:
+                    if list_distance[i] < list_distance[i + 1]:
+                        continue
+                    if list_distance[i + 1] > threshold:
+                        continue
+                list_bounary[j] = i
+                j = j + 1
+        return list_bounary
+
+    def isChangeShot(self, position, threshold):
+        if position < 1 or position > (len(list_distance)-2):
+            return False
+        if list_distance[position] == 0:
+            return False
+        # if (position < len(list_distance) - 1) and list_distance[position+1] == 0 :
+        if list_distance[position-1] != 0 and list_distance[position+1] != 0 and \
+                (list_distance[position]/list_distance[position-1] > threshold) and \
+                (list_distance[position]/list_distance[position+1] > threshold):
+            return True
+        return False
+
