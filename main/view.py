@@ -76,16 +76,20 @@ class exampleQMainWindow (QMainWindow):
         self.labelFirstFrame.setText("Please Wait...")
         fname = QFileDialog.getOpenFileName(self, 'Open file', '/home')
         video = VideoDemo(fname[0])
-        list_distance = video.calcDifferent();
+        list_distance = video.calcDifferent()
+        list_second = video.calcSecondDerivative(list_distance)
+        list_second_abs = {}
+        for i in range(len(list_second)):
+            list_second_abs[i] = abs(list_second[i])
 
         # Chuyen ve dang numpy.array de ve do thi tren matplotlib
         array_distance = np.array(list_distance.items(), dtype='float')
-        higher = video.calcHigherDegree(list_distance)
-        list_threshold = video.calcAdaptiveThreshold(list_distance, 2, higher)
+        higher = video.calcHigherDegree(list_second_abs)
+        list_threshold = video.calcAdaptiveThreshold(list_second_abs, 2, higher)
         # print higher
         arr_threshold = np.array(list_threshold.items(), dtype='float')  # nguong adaptive
 
-        list_boundary = video.calcBoundary(list_distance, list_threshold)
+        list_boundary = video.calcBoundary(list_second, list_threshold)
         video.getShotFrame(list_boundary)
 
         # plt.plot(arr_threshold[0:200, 0], arr_threshold[0:200, 1], 'red', array_distance[0:200, 0],
