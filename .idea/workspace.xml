@@ -2,9 +2,7 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="c9869436-5ab7-4821-bfe1-30d7125ce702" name="Default" comment="">
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/main/MyVideo.py" afterPath="$PROJECT_DIR$/main/MyVideo.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/main/view.py" afterPath="$PROJECT_DIR$/main/view.py" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="TRACKING_ENABLED" value="true" />
@@ -19,8 +17,8 @@
       <file leaf-file-name="MyVideo.py" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/main/MyVideo.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="173">
-              <caret line="197" column="44" lean-forward="false" selection-start-line="197" selection-start-column="35" selection-end-line="197" selection-end-column="44" />
+            <state relative-caret-position="133">
+              <caret line="189" column="43" lean-forward="false" selection-start-line="189" selection-start-column="43" selection-end-line="189" selection-end-column="43" />
               <folding>
                 <element signature="e#0#10#0" expanded="true" />
               </folding>
@@ -778,8 +776,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/main/MyVideo.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="173">
-          <caret line="197" column="44" lean-forward="false" selection-start-line="197" selection-start-column="35" selection-end-line="197" selection-end-column="44" />
+        <state relative-caret-position="133">
+          <caret line="189" column="43" lean-forward="false" selection-start-line="189" selection-start-column="43" selection-end-line="189" selection-end-column="43" />
           <folding>
             <element signature="e#0#10#0" expanded="true" />
           </folding>

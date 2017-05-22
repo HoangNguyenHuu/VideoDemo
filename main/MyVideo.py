@@ -187,7 +187,7 @@ class VideoDemo:
         print "##############"
         print list_distance_sort
         for item in list_distance_sort:
-            if self.isChangeShot(item[0], 50):
+            if self.isChangeShot(item[0], 10):
                 threshold = item[1]
         return threshold
 
