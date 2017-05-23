@@ -85,7 +85,7 @@ class exampleQMainWindow (QMainWindow):
         # Chuyen ve dang numpy.array de ve do thi tren matplotlib
         higher = video.calcHigherDegree(list_second_abs)
         average = video.calcAverageDerivative(list_second)
-        threshold = 2*higher + 6*average
+        threshold = 2*higher + 6 *average
         print threshold
         # print higher
         list_boundary = video.calcBoundaryConstant(list_second_abs, threshold)

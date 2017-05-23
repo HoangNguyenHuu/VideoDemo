@@ -94,7 +94,7 @@ class VideoDemo:
         arr_distance = np.array(list_distance.items(), dtype='float')
         temp = arr_distance[:, 1]
         total = np.nansum(temp)
-        higher = 3*total / len(temp)
+        higher = 2* total / len(temp)
         return higher
 
     def calcBoundary(self, list_distance, list_threshold):
