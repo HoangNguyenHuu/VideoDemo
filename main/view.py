@@ -12,85 +12,90 @@ class QCustomQWidget (QWidget):
         self.allQHBoxLayout  = QHBoxLayout()
         self.textLabel = QLabel()
         self.textLabel.setAlignment(Qt.AlignCenter)
-        self.textLabel.setFixedWidth(100)
+        self.textLabel.setFixedWidth(300)
         self.iconQLabel1      = QLabel()
-        self.iconQLabel2      = QLabel()
+        self.buttonShow      = QPushButton("Show")
 
         self.allQHBoxLayout.addWidget(self.textLabel, 0)
         self.allQHBoxLayout.addWidget(self.iconQLabel1, 1)
-        self.allQHBoxLayout.addWidget(self.iconQLabel2, 2)
+        self.allQHBoxLayout.addWidget(self.buttonShow, 2)
         self.setLayout(self.allQHBoxLayout)
 
     def setText(self, text):
         self.textLabel.setText(text)
-    def setLeftIcon (self, imagePath):
-        self.iconQLabel1.setPixmap(QPixmap(imagePath).scaled(270, 150))
-    def setRightIcon (self, imagePath):
-        self.iconQLabel2.setPixmap(QPixmap(imagePath).scaled(270, 150))
+    def setKeyIcon (self, imagePath):
+        self.iconQLabel1.setPixmap(QPixmap(imagePath).scaled(300, 168))
+    # def setButton (self, imagePath):
+        # self.iconQLabel2.setPixmap(QPixmap(imagePath).scaled(270, 150))
 
 class exampleQMainWindow (QMainWindow):
     def __init__ (self):
         super(exampleQMainWindow, self).__init__()
         # Create QListWidget
-        self.leftFrame = QFrame(self)
-        self.rightFrame = QFrame(self)
+        # self.leftFrame = QFrame(self)
+        # self.rightFrame = QFrame(self)
+        #
+        # self.leftFrame.resize(300, 600)
+        # self.leftFrame.move(0,0)
+        # # self.leftFrame.setStyleSheet("background-color: green")
+        #
+        # self.rightFrame.resize(700, 600)
+        # self.rightFrame.move(300,0)
 
-        self.leftFrame.resize(300, 600)
-        self.leftFrame.move(0,0)
-        # self.leftFrame.setStyleSheet("background-color: green")
+        btn1 = QPushButton("Select your video", self)
+        btn1.resize(900, 50)
+        btn1.setStyleSheet("background-color: green")
+        btn1.move(0, 0)
 
-        self.rightFrame.resize(700, 600)
-        self.rightFrame.move(300,0)
-
-        btn1 = QPushButton("Select your video", self.leftFrame)
-        btn1.move(80, 300)
-
-        self.labelShot = QLabel("", self.rightFrame)
+        self.labelShot = QLabel("", self)
         self.labelShot.setAlignment(Qt.AlignCenter)
-        self.labelShot.resize(100, 50)
-        self.labelShot.move(0,0)
+        self.labelShot.resize(300, 50)
+        self.labelShot.move(0,50)
 
-        self.labelFirstFrame = QLabel("Please select your video", self.rightFrame)
-        self.labelFirstFrame.setAlignment(Qt.AlignCenter)
-        self.labelFirstFrame.resize(270, 50)
-        self.labelFirstFrame.move(130, 0)
+        self.labelKeyFrame = QLabel("Please select your video", self)
+        self.labelKeyFrame.setAlignment(Qt.AlignCenter)
+        self.labelKeyFrame.resize(300, 50)
+        self.labelKeyFrame.move(300, 50)
 
-        self.labelLastFrame = QLabel("", self.rightFrame)
-        self.labelLastFrame.setAlignment(Qt.AlignCenter)
-        self.labelLastFrame.resize(270, 50)
-        self.labelLastFrame.move(400, 0)
+        self.labelShow = QLabel("", self)
+        self.labelShow.setAlignment(Qt.AlignCenter)
+        self.labelShow.resize(300, 50)
+        self.labelShow.move(600, 50)
 
 
-        self.myQListWidget = QListWidget(self.rightFrame)
-        self.myQListWidget.resize(700, 550)
-        self.myQListWidget.move(0, 50)
+        self.myQListWidget = QListWidget(self)
+        self.myQListWidget.resize(900, 500)
+        self.myQListWidget.move(0, 100)
         # self.myQListWidget.setStyleSheet("background-color: red")
 
         btn1.clicked.connect(self.buttonClicked)
 
-        self.setGeometry(200, 100, 1000, 600)
+        self.setGeometry(200, 100, 900, 600)
         self.setWindowTitle('Video Demo')
         self.show()
 
     def buttonClicked(self):
-        self.labelFirstFrame.setText("Please Wait...")
+        self.labelKeyFrame.setText("Please Wait...")
         fname = QFileDialog.getOpenFileName(self, 'Open file', '/home')
         video = VideoDemo(fname[0])
+        validVideo = video.validVideo()
+        if validVideo == False:
+            return
         list_distance = video.calcDifferent()
-        list_second = video.calcSecondDerivative(list_distance)
-        list_second_abs = {}
-        for i in range(len(list_second)):
-            list_second_abs[i] = abs(list_second[i])
 
         # Chuyen ve dang numpy.array de ve do thi tren matplotlib
         array_distance = np.array(list_distance.items(), dtype='float')
-        higher = video.calcHigherDegree(list_second_abs)
-        list_threshold = video.calcAdaptiveThreshold(list_second_abs, 2, higher)
+        higher = video.calcHigherDegree(list_distance)
+        list_threshold = video.calcAdaptiveThreshold(list_distance, 2, higher)
         # print higher
         arr_threshold = np.array(list_threshold.items(), dtype='float')  # nguong adaptive
 
-        list_boundary = video.calcBoundary(list_second, list_threshold)
-        video.getShotFrame(list_boundary)
+        list_boundary = video.calcBoundary(list_distance, list_threshold)
+        list_key = video.getKeyFrame(list_boundary)
+        list_begin = list_key['begin']
+        list_end = list_key['end']
+        # video.getShotVideo(list_begin, list_end)
+
 
         # plt.plot(arr_threshold[0:200, 0], arr_threshold[0:200, 1], 'red', array_distance[0:200, 0],
         #          array_distance[0:200, 1], 'blue')
@@ -102,83 +107,35 @@ class exampleQMainWindow (QMainWindow):
 
     def testShow(self):
         self.labelShot.setText("Shot")
-        self.labelFirstFrame.setText("First Frame")
-        self.labelLastFrame.setText("Last Frame")
+        self.labelKeyFrame.setText("Key Frame")
+        self.labelShow.setText("Show")
         start = self.link.rfind('/')
         end = self.link.rfind('.')
         name = self.link[start + 1: end]
-        dirname = '/home/hoangnh/boundary/' + name + '_boundary/'
+        dirname = os.path.dirname(os.path.dirname(os.path.abspath(__file__))) + name + '_keyframe/'
         files = []
         for file in os.listdir(dirname):
             if file.endswith(".png"):
                 files.append(os.path.join(dirname, file))
 
         files = sorted(files)
-        step = len(files) / 2
-        file1 = files[0: step]
-        file1.sort(key=len)
-        file2 = files[step: len(files)]
-        file2.sort(key=len)
+        files.sort(key=len)
 
-        for key in range(0, len(file1)):
+        for key in range(0, len(files)):
             # print key
             text = "Shot " + str(key)
-            imageLeft = file1[key]
-            imgeRight = file2[key]
+            keyFrame = files[key]
             # print imageLeft
             # print imgeRight
 
             # print "----"
-
             myQCustomQWidget = QCustomQWidget()
             myQCustomQWidget.setText(text)
-            myQCustomQWidget.setLeftIcon(imageLeft)
-            myQCustomQWidget.setRightIcon(imgeRight)
+            myQCustomQWidget.setKeyIcon(keyFrame)
             myQListWidgetItem = QListWidgetItem(self.myQListWidget)
             myQListWidgetItem.setSizeHint(myQCustomQWidget.sizeHint())
             self.myQListWidget.addItem(myQListWidgetItem)
             self.myQListWidget.setItemWidget(myQListWidgetItem, myQCustomQWidget)
-
-    def showBoundaryFrame(self):
-        dirname = '/home/hoangnh/boundary/testvideo_boundary/'
-        files = []
-        for file in os.listdir(dirname):
-            if file.endswith(".png"):
-                files.append(os.path.join(dirname, file))
-
-        files = sorted(files)
-        step = len(files) / 2
-        file1 = files[0: step]
-        file1.sort(key=len)
-        file2 = files[step: len(files)]
-        file2.sort(key=len)
-
-        for key in range(0, len(file1)):
-            print key
-            text = "Shot " + str(key)
-            imageLeft = file1[key]
-            imgeRight = file2[key]
-            print imageLeft
-            print imgeRight
-
-            print "----"
-
-            myQCustomQWidget = QCustomQWidget()
-            myQCustomQWidget.setText(text)
-            myQCustomQWidget.setLeftIcon(imageLeft)
-            myQCustomQWidget.setRightIcon(imgeRight)
-            myQListWidgetItem = QListWidgetItem(self.myQListWidget)
-            myQListWidgetItem.setSizeHint(myQCustomQWidget.sizeHint())
-            self.myQListWidget.addItem(myQListWidgetItem)
-            self.myQListWidget.setItemWidget(myQListWidgetItem, myQCustomQWidget)
-
-    def insertItem(self, ):
-        for i in range(1, 100):
-            self.myQListWidget.addItem(str(i))
-            self.myQListWidget.repaint()
-
-
-
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
