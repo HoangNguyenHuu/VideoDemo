@@ -178,16 +178,10 @@ class VideoDemo:
         threshold = 0
         list_distance = self.calcDifferent()
         list_distance_sort = reversed(sorted(list_distance.items(), key=operator.itemgetter(1)))
-        max_distance = max(list_distance, key=list_distance.get)
-        min_distance = min(list_distance, key=list_distance.get)
-        print "###########max_distance"
-        print max_distance
-        print "###########min_distance"
-        print min_distance
         print "##############"
         print list_distance_sort
         for item in list_distance_sort:
-            if self.isChangeShot(item[0], 10):
+            if self.isMaximaGraph(item[0], 20):
                 threshold = item[1]
         return threshold
 
@@ -205,15 +199,14 @@ class VideoDemo:
                 j = j + 1
         return list_bounary
 
-    def isChangeShot(self, position, threshold):
+    def isMaximaGraph(self, position, threshold):
         if position < 1 or position > (len(list_distance)-2):
             return False
         if list_distance[position] == 0:
             return False
-        # if (position < len(list_distance) - 1) and list_distance[position+1] == 0 :
-        if list_distance[position-1] != 0 and list_distance[position+1] != 0 and \
-                (list_distance[position]/list_distance[position-1] > threshold) and \
-                (list_distance[position]/list_distance[position+1] > threshold):
+        if list_distance[position-1] != 0 and list_distance[position + 1] != 0 and \
+                ((list_distance[position]/list_distance[position - 1] > threshold) and
+                     (list_distance[position]/list_distance[position + 1] > threshold)):
             return True
         return False
 
