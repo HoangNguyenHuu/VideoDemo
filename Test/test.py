@@ -1,4 +1,4 @@
-from MyVideo import VideoDemo
+from main.MyVideo import VideoDemo
 import numpy as np
 import matplotlib.pyplot as plt
 

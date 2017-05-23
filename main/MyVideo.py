@@ -1,6 +1,7 @@
 import cv2
 import numpy as np
 import os
+from scipy.signal import argrelextrema
 
 
 class VideoDemo:
@@ -76,11 +77,24 @@ class VideoDemo:
 
         return list_second
 
+    def calcAverageDerivative(self, list_second):
+        list_second_abs = {}
+        for i in range(len(list_second)):
+            list_second_abs[i] = abs(list_second[i])
+        arr_second_abs = np.array(list_second_abs.items(), dtype='float')
+        my_arr = arr_second_abs[:, 1]
+        index = argrelextrema(my_arr, np.greater)
+        total = 0
+        for i in index:
+            total = total + my_arr[i]
+        average = total.sum() / len(index[0])
+        return average
+
     def calcHigherDegree(self, list_distance):
         arr_distance = np.array(list_distance.items(), dtype='float')
         temp = arr_distance[:, 1]
         total = np.nansum(temp)
-        higher = 3 * total / len(temp)
+        higher = 3*total / len(temp)
         return higher
 
     def calcBoundary(self, list_distance, list_threshold):
@@ -88,6 +102,15 @@ class VideoDemo:
         j = 0
         for i in range(0, len(list_distance)):
             if (list_distance[i] > list_threshold[i]):
+                list_bounary[j] = i
+                j = j + 1
+        return list_bounary
+
+    def calcBoundaryConstant(self, list_distance, threshold):
+        list_bounary = {}
+        j = 0
+        for i in range(0, len(list_distance)):
+            if (list_distance[i] > threshold):
                 list_bounary[j] = i
                 j = j + 1
         return list_bounary

@@ -2,7 +2,7 @@ import sys
 import os
 from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
-from MyVideo import VideoDemo
+from main.MyVideo import VideoDemo
 import numpy as np
 import matplotlib.pyplot as plt
 import cv2
