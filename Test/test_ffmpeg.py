@@ -1,7 +1,11 @@
 import subprocess as sp
 FFMPEG_BIN = "ffmpeg"
+x = 2
+y = 300
+origin = 'anni001.mpg'
+ouput = "out.mp4"
 command = [ FFMPEG_BIN,
-            '-i', 'anni001.mpg',
-            '-vf', 'trim=start_frame=2:end_frame=30',
-            '-an', 'hello.mp4']
+            '-i', origin,
+            '-vf', 'trim=start_frame='+ str(x) +':end_frame='+str(y),
+            '-an',ouput]
 pipe = sp.Popen(command, stdout = sp.PIPE, bufsize=10**8)
