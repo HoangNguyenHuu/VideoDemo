@@ -5,16 +5,19 @@ from PyQt5.QtGui import *
 from PyQt5.QtCore import *
 from MyVideo import VideoDemo
 import numpy as np
+import cv2
 
 class QCustomQWidget (QWidget):
-    def __init__ (self, parent = None):
+    def __init__ (self, name, parent = None):
         super(QCustomQWidget, self).__init__(parent)
+        self.name = name
         self.allQHBoxLayout  = QHBoxLayout()
-        self.textLabel = QLabel()
+        self.textLabel = QLabel("")
         self.textLabel.setAlignment(Qt.AlignCenter)
         self.textLabel.setFixedWidth(300)
         self.iconQLabel1      = QLabel()
         self.buttonShow      = QPushButton("Show")
+        self.buttonShow.clicked.connect(self.showShot)
 
         self.allQHBoxLayout.addWidget(self.textLabel, 0)
         self.allQHBoxLayout.addWidget(self.iconQLabel1, 1)
@@ -25,8 +28,26 @@ class QCustomQWidget (QWidget):
         self.textLabel.setText(text)
     def setKeyIcon (self, imagePath):
         self.iconQLabel1.setPixmap(QPixmap(imagePath).scaled(300, 168))
-    # def setButton (self, imagePath):
-        # self.iconQLabel2.setPixmap(QPixmap(imagePath).scaled(270, 150))
+    def showShot (self):
+        print self.name
+        cap = cv2.VideoCapture(self.name)
+
+        while (cap.isOpened()):
+            ret, frame = cap.read()
+            if ret != True:
+                break
+            gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+
+            cv2.imshow('frame', gray)
+            if cv2.waitKey(120) & 0xFF == ord('q'):
+                break
+
+        cap.release()
+        cv2.destroyAllWindows()
+        cv2.waitKey(-1)
+        cv2.waitKey(-1)
+        cv2.waitKey(-1)
+        cv2.waitKey(-1)
 
 class exampleQMainWindow (QMainWindow):
     def __init__ (self):
@@ -43,9 +64,15 @@ class exampleQMainWindow (QMainWindow):
         # self.rightFrame.move(300,0)
 
         btn1 = QPushButton("Select your video", self)
-        btn1.resize(900, 50)
-        btn1.setStyleSheet("background-color: green")
-        btn1.move(0, 0)
+        btn1.resize(200, 30)
+        # btn1.setStyleSheet("background-color: green")
+        btn1.move(30, 30)
+
+        self.labelInformation = QLabel("", self)
+        # self.labelInformation.setStyleSheet("background-color: red")
+        # self.labelInformation.setAlignment(Qt.AlignCenter)
+        self.labelInformation.resize(300, 30)
+        self.labelInformation.move(300, 30)
 
         self.labelShot = QLabel("", self)
         self.labelShot.setAlignment(Qt.AlignCenter)
@@ -79,8 +106,10 @@ class exampleQMainWindow (QMainWindow):
         fname = QFileDialog.getOpenFileName(self, 'Open file', '/home')
         video = VideoDemo(fname[0])
         validVideo = video.validVideo()
-        if validVideo == False:
+        self.labelInformation.setText(validVideo['info'])
+        if validVideo["flag"] == False:
             return
+
         list_distance = video.calcDifferent()
 
         threshold = video.detectThreshold()
@@ -102,7 +131,7 @@ class exampleQMainWindow (QMainWindow):
         list_key = video.getKeyFrame(list_boundary)
         list_begin = list_key['begin']
         list_end = list_key['end']
-        # video.getShotVideo(list_begin, list_end)
+        video.getShotVideo(list_begin, list_end)
 
 
         # plt.plot(arr_threshold[0:200, 0], arr_threshold[0:200, 1], 'red', array_distance[0:200, 0],
@@ -121,6 +150,7 @@ class exampleQMainWindow (QMainWindow):
         end = self.link.rfind('.')
         name = self.link[start + 1: end]
         dirname = os.path.dirname(os.path.dirname(os.path.abspath(__file__))) + name + '_keyframe/'
+        dirname2 = os.path.dirname(os.path.dirname(os.path.abspath(__file__))) + name + '_shotvideo/'
         files = []
         for file in os.listdir(dirname):
             if file.endswith(".png"):
@@ -131,13 +161,14 @@ class exampleQMainWindow (QMainWindow):
 
         for key in range(0, len(files)):
             # print key
-            text = "Shot " + str(key)
+            text = "shot " + str(key)
             keyFrame = files[key]
             # print imageLeft
             # print imgeRight
 
             # print "----"
-            myQCustomQWidget = QCustomQWidget()
+            this_dirname = dirname2 + "shot"+str(key)+".avi"
+            myQCustomQWidget = QCustomQWidget(this_dirname)
             myQCustomQWidget.setText(text)
             myQCustomQWidget.setKeyIcon(keyFrame)
             myQListWidgetItem = QListWidgetItem(self.myQListWidget)
