@@ -13,13 +13,25 @@ class VideoDemo:
         cap = cv2.VideoCapture(self.link)
         if not cap.isOpened():
             print "Fatal error - could not open video."
-            return False
+            return {"flag": False, "info": "Not Video Format"}
         else:
             print "Parsing video..."
-            width = cap.get(cv2.CAP_PROP_FRAME_WIDTH)
-            height = cap.get(cv2.CAP_PROP_FRAME_HEIGHT)
+            width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
+            height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
             print "Video Resolution: %d x %d" % (width, height)
-            return True
+            start = self.link.rfind('/')
+            name = self.link[start + 1: len(self.link)]
+            info = name + ": " + str(width) + " x " + str(height)
+            return {"flag":True, "info": info}
+
+    def getVideoInfo(self):
+        cap = cv2.VideoCapture(self.link)
+        width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
+        height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
+        name = os.path.basename(self.link)
+        print name
+        info = name + ": " + str(width) + " x " + str(height)
+        return info
 
     def calcDifferent(self):
         cap = cv2.VideoCapture(self.link)
@@ -264,12 +276,37 @@ class VideoDemo:
                         os.unlink(file_path)
                 except Exception as e:
                     print (e)
+        cap = cv2.VideoCapture(self.link)
+        width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
+        height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
 
-        FFMPEG_BIN = "ffmpeg"
-        for i in range(len(list_begin)):
-            file_name = dirname + "shot_" + str(i) + ".mp4"
-            command = [FFMPEG_BIN,
-                       '-i', self.link,
-                       '-vf', 'trim=start_frame=' + str(list_begin[i]) + ':end_frame=' + str(list_end[i]),
-                       '-an', file_name]
-            pipe = sp.Popen(command, stdout=sp.PIPE, bufsize=10 ** 8)
+
+        fourcc = cv2.VideoWriter_fourcc(*'XVID')
+        fps = int(cap.get(cv2.CAP_PROP_FPS))
+        length = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
+
+        shotpath = dirname + "shot0.avi"
+        out2 = cv2.VideoWriter(shotpath, fourcc, fps, (width, height))
+        index2 = 0
+        lengthShot = len(list_end) - 1
+        # loop through again video then get shot                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     ame and shot
+        for i in range(length):
+            # Capture frame-by-frameOCN
+            ret, frame = cap.read()
+            # calculate the constrast
+            if (ret != True):
+                break
+            if ((i == int(list_end[index2] + 1))):
+
+                #         keypath2 = output_keyframe_path2 + "frame%d.jpg" % i
+                #         cv2.imwrite(keypath2, gray)
+                index2 = index2 + 1
+                out2.release()
+                shotpath = dirname + 'shot%d.avi' % index2
+                out2 = cv2.VideoWriter(shotpath, fourcc, fps,
+                                       (width, height))
+                out2.write(frame)
+                if (index2 >= lengthShot):
+                    break
+            else:
+                out2.write(frame)
