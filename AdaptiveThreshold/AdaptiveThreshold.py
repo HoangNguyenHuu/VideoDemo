@@ -72,7 +72,7 @@ class VideoDemo:
                 total = 0
                 for x in range(key - w, key + w + 1):
                     total = total + list_distance[x]
-                list_threshold[key] = total / (2 * w + 1) + c
+                list_threshold[key] = 2 * total / (2 * w + 1) + c
             else:
                 list_threshold[key] = list_distance[key] + c
         return list_threshold

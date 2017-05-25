@@ -73,7 +73,7 @@ class VideoDemo2:
         x = np.array(x, dtype='float')
         x = x[np.where(x > 0)]
         len_c = int(len(x) / 50)
-        len_s = int(len(x) / 20)
+        len_s = int(len(x) / 10)
         t_c = x[0:len_c].sum() / len_c
         t_s = x[0:len_s].sum() / len_s
         return {"t_c": t_c, "t_s": t_s}
