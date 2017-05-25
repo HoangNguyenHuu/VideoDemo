@@ -4,6 +4,7 @@ import os
 import operator
 from scipy.signal import argrelextrema
 import subprocess as sp
+from subprocess import call
 
 class VideoDemo:
     def __init__(self, link):
@@ -29,7 +30,7 @@ class VideoDemo:
         width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
         height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
         name = os.path.basename(self.link)
-        print name
+
         info = name + ": " + str(width) + " x " + str(height)
         return info
 
@@ -208,32 +209,46 @@ class VideoDemo:
             i = i + 1
         cap.release()
 
-    def detectThreshold(self):
+    def getListDistance(self):
         global list_distance
-        threshold = 0
         list_distance = self.calcDifferent()
-        print list_distance
-        list_distance_sort = reversed(sorted(list_distance.items(), key=operator.itemgetter(1)))
+        print "len"
+        print len(list_distance)
+        max_distance = max(list_distance, key=list_distance.get)
+        min_distance = min(list_distance, key=list_distance.get)
+        print "###########max_distance"
+        print max_distance
+        print "###########min_distance"
+        print min_distance
         print "##############"
-        print list_distance_sort
+
+
+    def detectThreshold(self, consts):
+        threshold = {}
+        list_distance_sort = reversed(sorted(list_distance.items(), key=operator.itemgetter(1)))
         for item in list_distance_sort:
-            if self.isMaximaGraph(item[0], 2):
-                print item[0]
-                threshold = item[1]
+            if self.isMaximaGraph(item[0], consts["tc"]):
+                threshold["tc"] = item[1]
+            if self.isMaximaGraph(item[0], consts["ts"]):
+                threshold["ts"] = item[1]
         return threshold
 
     def detectShot(self, threshold):
         list_bounary = {}
         j = 0
         for i in range(0, len(list_distance)):
-            if list_distance[i] >= threshold:
-                if i < len(list_distance) - 1:
+            print i
+            print list_distance[i]
+            if list_distance[i] >= threshold["tc"]:
+                if i < len(list_distance) - 2:
                     if list_distance[i] < list_distance[i + 1]:
                         continue
-                    if list_distance[i + 1] > threshold:
+                    if i > 0 and i < len(list_distance) - 3 and max(list_distance[i +1],list_distance[i +2]) > threshold["tc"]:
                         continue
-                list_bounary[j] = i
-                j = j + 1
+                    else:
+                        list_bounary[j] = i
+                        j = j + 1
+
         return list_bounary
 
     def isMaximaGraph(self, position, threshold):
@@ -295,7 +310,6 @@ class VideoDemo:
                     cv2.imwrite(os.path.join(dirname, filename), frame)
                     key_index = key_index + 1
             i = i + 1
-        print i
         cap.release()
         return {"begin": list_begin, "end": list_end}
 
@@ -347,8 +361,36 @@ class VideoDemo:
             else:
                 out2.write(frame)
 
-
     def calcThresholdConst(self):
-        list_maxium_graph = np.array(list_distance.items(), dtype='double')
+        threshold = {}
+        list_maxium_graph = np.array(list_distance.items(), dtype='float')
         arr_maxium_graph = argrelextrema(list_maxium_graph[:, 1], np.greater)
-        print arr_maxium_graph;
+        print "len" + str(len(arr_maxium_graph[0]))
+        i = 1
+        j = 1
+        threshold["tc"] = 0
+        threshold["ts"] = 0
+        for item in arr_maxium_graph[0]:
+            print "item: " + str(item)
+            print "item value: " + str(list_distance[item])
+            tempThreshold1 = 0
+            tempThreshold2 = 0
+            if item == 0:
+                continue
+            if item < 1 or item > len(list_distance) - 2:
+                continue
+            if list_distance[item - 1] != 0:
+                tempThreshold1 = list_distance[item] / list_distance[item - 1]
+            if list_distance[item + 1] != 0:
+                tempThreshold2 = list_distance[item] / list_distance[item + 1]
+            if tempThreshold1 != 0 and tempThreshold2 != 0 and \
+                    ((tempThreshold1 / tempThreshold2 > 2 and tempThreshold2 > 1) or (tempThreshold2 / tempThreshold1 > 2 and tempThreshold1 > 1)):
+                threshold["tc"] += min(tempThreshold2, tempThreshold1)
+                i = i + 1
+
+        for item in list_distance.items():
+            threshold["ts"] += item[1]
+        threshold["tc"] = threshold["tc"] / i
+        threshold["ts"] = threshold["ts"] / len(list_distance)
+        return threshold
+

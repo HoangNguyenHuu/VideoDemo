@@ -36,9 +36,8 @@ class QCustomQWidget (QWidget):
             ret, frame = cap.read()
             if ret != True:
                 break
-            gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
 
-            cv2.imshow('frame', gray)
+            cv2.imshow('frame', frame)
             if cv2.waitKey(120) & 0xFF == ord('q'):
                 break
 
@@ -111,12 +110,14 @@ class exampleQMainWindow (QMainWindow):
             return
 
         list_distance = video.calcDifferent()
-
-        threshold = video.detectThreshold()
+        video.getListDistance()
+        thresholdConst = video.calcThresholdConst()
+        print "thresholdConst"
+        print thresholdConst
+        threshold = video.detectThreshold(thresholdConst)
         print "################threshold"
         print threshold
         list_boundary = video.detectShot(threshold)
-        video.calcThresholdConst()
         print list_boundary
 
 
