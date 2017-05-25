@@ -1,10 +1,9 @@
 import cv2
 import numpy as np
 import os
-import subprocess as sp
 
 
-class VideoDemo:
+class VideoDemo2:
     def __init__(self, link):
         self.link = link
 
@@ -22,13 +21,13 @@ class VideoDemo:
             name = self.link[start + 1: len(self.link)]
             info = name + ": " + str(width) + " x " + str(height)
             return {"flag":True, "info": info}
-
     def calcDifferent(self):
         cap = cv2.VideoCapture(self.link)
         i = 0
         hist_new = np.array([])
         hist_old = np.array([])
         list_distance = {}
+        list_hist = {}
 
         # tinh histogram cho frame do va tinh khoang cach voi frame phia truoc
         while (cap.isOpened()):
@@ -38,10 +37,13 @@ class VideoDemo:
             # Neu khong con frame nao thi ket thuc
             if (ret != True):
                 break
-            image = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+            cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+            #             img = self.histogram_equalize(frame)
             # Tinh histogram
-            hist_new = cv2.calcHist([image], [0, 1, 2], None, [32, 32, 32],
+            hist_new = cv2.calcHist([frame], [0, 1, 2], None, [8, 8, 8],
                                     [0, 256, 0, 256, 0, 256])
+            #             cv2.normalize(hist,hist_new).flatten()
+            list_hist[i] = hist_new
 
             # Neu la frame dau tien thi chua can so sanh
             if (i == 0):
@@ -52,43 +54,85 @@ class VideoDemo:
             # Neu khong phai la frame dau tien, so sanh histogram
             # Luu y: tham so thu 3 cua ham compareHist nhan 4 gia tri 0,1,2,3 tuong ung voi cac cach tinh khoang cach
             # O day dung 0, tuong ung voi cach tinh do tuong dong correlation, lay 1 - do tuong dong => khoang cach
-            list_distance[i - 1] = cv2.compareHist(hist_new, hist_old, 1)
+            d = cv2.compareHist(hist_new, hist_old, 0)
 
+            if (np.isnan(d)):
+                print "nan %d", i
+                d = 1
             # Them vao ket qua so sanh histogram
-
+            list_distance[i - 1] = 1 - d
             # Tang i, cho hist_new thanh hist_old de tinh tiep
             i = i + 1
             hist_old = hist_new
 
-        # print i
+        print i
         cap.release()
-        return list_distance
+        return {"list_distance": list_distance, "list_hist": list_hist}
 
-    def calcAdaptiveThreshold(self, list_distance, w, c):
-        # lay cua so kich thuoc la 2 * w + 1
-        # nguong cao hon gia tri trung binh la c
-        list_threshold = {}
-        for key in list_distance:
-            if (key - w >= 0 and key + w < len(list_distance)):
-                total = 0
-                for x in range(key - w, key + w + 1):
-                    total = total + list_distance[x]
-                list_threshold[key] = total / (2 * w + 1) + c
-            else:
-                list_threshold[key] = list_distance[key] + c
-        return list_threshold
+    def getThresholds(self, list_distance):
+        x = sorted(list_distance.values(), reverse=True)
+        x = np.array(x, dtype='float')
+        x = x[np.where(x > 0)]
+        len_c = int(len(x) / 50)
+        len_s = int(len(x) / 20)
+        t_c = x[0:len_c].sum() / len_c
+        t_s = x[0:len_s].sum() / len_s
+        return {"t_c": t_c, "t_s": t_s}
 
-    def calcBoundary(self, list_distance, list_threshold):
-        # Tinh cac diem vuot nguong
-        list_bounary = {}
-        j = 0
-        for i in range(0, len(list_distance)):
-            if (list_distance[i] > list_threshold[i]):
-                list_bounary[j] = i
-                j = j + 1
-        print  "List boundary:"
-        print list_bounary
-        return list_bounary
+    def getBoundary(self, t_c, t_s, list_distance, list_hist):
+        # Lay cac diem hard cut va co the la soft cut
+        list_hardcut = {}
+        list_softcut = {}
+        index_hard = 0
+        index_soft = 0
+        for i in range(len(list_distance)):
+            if list_distance[i] > t_c:
+                list_hardcut[index_hard] = i
+                index_hard = index_hard + 1
+                continue
+            if list_distance[i] > t_s:
+                list_softcut[index_soft] = i
+                index_soft = index_soft + 1
+
+        # lay cac diem short cut thuc su
+        list_softcut_real = {}
+        index = 0
+        cut_now = 0
+        for i in range(len(list_softcut)):
+            check = list_softcut[i]
+            if check <= cut_now:
+                continue
+            ref_hist = list_hist[check]
+            for j in range(check + 1, check + 25):
+                d = 1 - cv2.compareHist(list_hist[j], ref_hist, 0)
+                if (np.isnan(d)):
+                    d = 0
+                if d > t_c:
+                    list_softcut_real[index] = j - 1
+                    cut_now = j - 1
+                    print "Check:", check, "Cut:", cut_now
+                    index = index + 1
+                    break
+
+        index = len(list_hardcut)
+        for i in range(len(list_softcut_real)):
+            list_hardcut[index] = list_softcut_real[i]
+            index = index + 1
+
+        # loai bo cac diem cut bi trung
+        list_cut = sorted(list_hardcut.values())
+        i = 1
+        while (i < len(list_cut)):
+            if list_cut[i] <= list_cut[i - 1] + 1:
+                del list_cut[i]
+                continue
+            i = i + 1
+
+        list_boundary = {}
+        for i in range(0, len(list_cut)):
+            list_boundary[i] = list_cut[i]
+        return list_boundary
+
 
     def getBeginEnd(self, list_boundary, length):
         begin = {}
@@ -106,11 +150,10 @@ class VideoDemo:
         return {"begin": begin, "end": end}
 
     def getShotFrame(self, list_boundary):
-        # Lay cac frame dau va cuoi moi shot roi luu vao file
         start = self.link.rfind('/')
         end = self.link.rfind('.')
         name = self.link[start + 1: end]
-        # dirname = os.path.dirname(os.path.dirname(os.path.abspath(__file__))) + name + '_boundary/'
+        # dirname = '/home/hoangnh/boundary/' + name + '_boundary/'
         dirname = os.path.expanduser('~') + "/video_database/" + name + "/" + name + '_boundary/'
         if not os.path.exists(dirname):
             os.makedirs(dirname)
@@ -242,7 +285,7 @@ class VideoDemo:
         shotpath = dirname + "shot0.avi"
         out2 = cv2.VideoWriter(shotpath, fourcc, fps, (width, height))
         index2 = 0
-        lengthShot = len(list_end) - 1
+        # lengthShot = len(list_end) - 1
         # loop through again video then get shot                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     ame and shot
         for i in range(length):
             # Capture frame-by-frameOCN
@@ -251,9 +294,6 @@ class VideoDemo:
             if (ret != True):
                 break
             if ((i == int(list_end[index2] + 1))):
-
-                #         keypath2 = output_keyframe_path2 + "frame%d.jpg" % i
-                #         cv2.imwrite(keypath2, gray)
                 index2 = index2 + 1
                 out2.release()
                 shotpath = dirname + 'shot%d.avi' % index2
@@ -264,3 +304,5 @@ class VideoDemo:
                 #     break
             else:
                 out2.write(frame)
+
+
