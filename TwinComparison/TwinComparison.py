@@ -53,7 +53,6 @@ class VideoDemo2:
 
             # Neu khong phai la frame dau tien, so sanh histogram
             # Luu y: tham so thu 3 cua ham compareHist nhan 4 gia tri 0,1,2,3 tuong ung voi cac cach tinh khoang cach
-            # O day dung 0, tuong ung voi cach tinh do tuong dong correlation, lay 1 - do tuong dong => khoang cach
             d = cv2.compareHist(hist_new, hist_old, 3)
 
             # if (np.isnan(d)):

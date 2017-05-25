@@ -117,7 +117,7 @@ class exampleQMainWindow (QMainWindow):
         self.btn1.clicked.connect(self.buttonClicked)
 
         self.setGeometry(200, 100, 900, 600)
-        self.setWindowTitle('Video Demo')
+        self.setWindowTitle('Shot Detect - Adaptive Threshold')
         self.show()
 
     def onActivated(self, text):

@@ -50,10 +50,9 @@ class VideoDemo:
 
             # Neu khong phai la frame dau tien, so sanh histogram
             # Luu y: tham so thu 3 cua ham compareHist nhan 4 gia tri 0,1,2,3 tuong ung voi cac cach tinh khoang cach
-            # O day dung 0, tuong ung voi cach tinh do tuong dong correlation, lay 1 - do tuong dong => khoang cach
-            d = 1 - cv2.compareHist(hist_new, hist_old, 0)
-            if(np.isnan(d)):
-                d = 0
+            d = cv2.compareHist(hist_new, hist_old, 3)
+            # if(np.isnan(d)):
+            #     d = 0
             # Them vao ket qua so sanh histogram
             list_distance[i-1] = d
             # Tang i, cho hist_new thanh hist_old de tinh tiep
