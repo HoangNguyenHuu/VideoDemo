@@ -28,7 +28,7 @@ class QCustomQWidget (QWidget):
     def setKeyIcon (self, imagePath):
         self.iconQLabel1.setPixmap(QPixmap(imagePath).scaled(300, 168))
     def showShot (self):
-        print self.name
+        # print self.name
         cap = cv2.VideoCapture(self.name)
 
         while (cap.isOpened()):
@@ -120,7 +120,7 @@ class exampleQMainWindow (QMainWindow):
         self.show()
 
     def onActivated(self, text):
-        print text
+        # print text
         if(text == "Shot Video"):
             self.showShotVideo()
         else:

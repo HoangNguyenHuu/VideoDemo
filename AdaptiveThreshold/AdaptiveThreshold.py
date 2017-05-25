@@ -1,7 +1,6 @@
 import cv2
 import numpy as np
 import os
-import subprocess as sp
 
 
 class VideoDemo:
@@ -11,13 +10,13 @@ class VideoDemo:
     def validVideo(self):
         cap = cv2.VideoCapture(self.link)
         if not cap.isOpened():
-            print "Fatal error - could not open video."
+            # print "Fatal error - could not open video."
             return {"flag": False, "info": "Not Video Format"}
         else:
-            print "Parsing video..."
+            # print "Parsing video..."
             width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
             height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
-            print "Video Resolution: %d x %d" % (width, height)
+            # print "Video Resolution: %d x %d" % (width, height)
             start = self.link.rfind('/')
             name = self.link[start + 1: len(self.link)]
             info = name + ": " + str(width) + " x " + str(height)
@@ -87,8 +86,8 @@ class VideoDemo:
             if (list_distance[i] > list_threshold[i]):
                 list_bounary[j] = i
                 j = j + 1
-        print  "List boundary:"
-        print list_bounary
+        # print  "List boundary:"
+        # print list_bounary
         return list_bounary
 
     def getBeginEnd(self, list_boundary, length):
@@ -160,7 +159,7 @@ class VideoDemo:
                     end_index = end_index + 1
 
             i = i + 1
-        print i
+        # print i
         cap.release()
 
     def getKeyFrame(self, list_boundary):
@@ -212,7 +211,7 @@ class VideoDemo:
                     cv2.imwrite(os.path.join(dirname, filename), frame)
                     key_index = key_index + 1
             i = i + 1
-        print i
+        # print i
         cap.release()
         return {"begin": list_begin, "end": list_end}
 

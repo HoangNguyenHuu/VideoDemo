@@ -10,13 +10,13 @@ class VideoDemo2:
     def validVideo(self):
         cap = cv2.VideoCapture(self.link)
         if not cap.isOpened():
-            print "Fatal error - could not open video."
+            # print "Fatal error - could not open video."
             return {"flag": False, "info": "Not Video Format"}
         else:
-            print "Parsing video..."
+            # print "Parsing video..."
             width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
             height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
-            print "Video Resolution: %d x %d" % (width, height)
+            # print "Video Resolution: %d x %d" % (width, height)
             start = self.link.rfind('/')
             name = self.link[start + 1: len(self.link)]
             info = name + ": " + str(width) + " x " + str(height)
@@ -54,13 +54,13 @@ class VideoDemo2:
             # Neu khong phai la frame dau tien, so sanh histogram
             # Luu y: tham so thu 3 cua ham compareHist nhan 4 gia tri 0,1,2,3 tuong ung voi cac cach tinh khoang cach
             # O day dung 0, tuong ung voi cach tinh do tuong dong correlation, lay 1 - do tuong dong => khoang cach
-            d = cv2.compareHist(hist_new, hist_old, 0)
+            d = cv2.compareHist(hist_new, hist_old, 3)
 
-            if (np.isnan(d)):
-                print "nan %d", i
-                d = 1
+            # if (np.isnan(d)):
+            #     print "nan %d", i
+            #     d = 1
             # Them vao ket qua so sanh histogram
-            list_distance[i - 1] = 1 - d
+            list_distance[i - 1] = d
             # Tang i, cho hist_new thanh hist_old de tinh tiep
             i = i + 1
             hist_old = hist_new
@@ -104,7 +104,7 @@ class VideoDemo2:
                 continue
             ref_hist = list_hist[check]
             for j in range(check + 1, check + 25):
-                d = 1 - cv2.compareHist(list_hist[j], ref_hist, 0)
+                d = cv2.compareHist(list_hist[j], ref_hist, 3)
                 if (np.isnan(d)):
                     d = 0
                 if d > t_c:

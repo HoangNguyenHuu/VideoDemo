@@ -29,7 +29,7 @@ class QCustomQWidget (QWidget):
     def setKeyIcon (self, imagePath):
         self.iconQLabel1.setPixmap(QPixmap(imagePath).scaled(300, 168))
     def showShot (self):
-        print self.name
+        # print self.name
         cap = cv2.VideoCapture(self.name)
 
         while (cap.isOpened()):
@@ -121,7 +121,7 @@ class exampleQMainWindow (QMainWindow):
         self.show()
 
     def onActivated(self, text):
-        print text
+        # print text
         if(text == "Shot Video"):
             self.showShotVideo()
         else:
@@ -142,7 +142,7 @@ class exampleQMainWindow (QMainWindow):
 
         # Chuyen ve dang numpy.array de ve do thi tren matplotlib
         array_distance = np.array(list_distance.items(), dtype='float')
-        print array_distance
+        # print array_distance
         higher = np.std(array_distance[:,1])
         list_threshold = video.calcAdaptiveThreshold(list_distance, 2, higher)
         # print higher
