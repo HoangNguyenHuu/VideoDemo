@@ -1,12 +1,12 @@
 ## Hướng dẫn cài đặt
 
-### Cài đặt python trên ubuntu
+### Link cài đặt anaconda
 ```
-https://www.digitalocean.com/community/tutorials/how-to-install-python-3-and-set-up-a-local-programming-environment-on-ubuntu-16-04
+https://docs.continuum.io/anaconda/install-linux.html
 
 ```
 
-### Cài đặt opencv 3.0 trên Anaconda Python Ubuntu
+### Link cài đặt opencv 3.0 trên Anaconda Python Ubuntu
 
 ```
 
