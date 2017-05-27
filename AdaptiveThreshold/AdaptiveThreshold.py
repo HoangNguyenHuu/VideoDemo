@@ -66,15 +66,15 @@ class VideoDemo:
     def calcAdaptiveThreshold(self, list_distance, w, c):
         # lay cua so kich thuoc la 2 * w + 1
         # nguong cao hon gia tri trung binh la c
+        arr_distance = np.array(list_distance.values(), dtype="float")
         list_threshold = {}
+        leng = len(list_distance)
         for key in list_distance:
-            if (key - w >= 0 and key + w < len(list_distance)):
-                total = 0
-                for x in range(key - w, key + w + 1):
-                    total = total + list_distance[x]
-                list_threshold[key] = 2 * total / (2 * w + 1) + c
-            else:
+            if (key < w or key >= leng - w):
                 list_threshold[key] = list_distance[key] + c
+                continue
+            arr_temp = arr_distance[key - w:key + w + 1]
+            list_threshold[key] = 2*np.mean(arr_temp) + c
         return list_threshold
 
     def calcBoundary(self, list_distance, list_threshold):
