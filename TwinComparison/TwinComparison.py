@@ -102,7 +102,7 @@ class VideoDemo2:
             if check <= cut_now:
                 continue
             ref_hist = list_hist[check]
-            for j in range(check + 1, check + 25):
+            for j in range(check + 1, check + 71):
                 d = cv2.compareHist(list_hist[j], ref_hist, 3)
                 if (np.isnan(d)):
                     d = 0
